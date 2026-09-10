@@ -14,14 +14,15 @@
 
   <div class="max-w-3xl mx-auto space-y-5">
     
-    <!-- Header mit Speichern-, Vollbild-Button und Zeitstempel -->
+    <!-- Header mit dynamischem Vollbild-Button und Zeitstempel -->
     <header class="bg-indigo-600 text-white p-5 sm:p-6 rounded-2xl shadow-md flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
       <div>
         <h1 class="text-2xl font-bold">Rohr-Etagenberechnung</h1>
-        <p class="text-indigo-100 text-sm mt-0.5">Stabile Version (PWA fix) &bull; Stand: 10.09.2026, 07:45 Uhr</p>
+        <p class="text-indigo-100 text-sm mt-0.5">Stabile Version (Smart UI) &bull; Stand: 10.09.2026, 07:55 Uhr</p>
       </div>
       <div class="flex flex-wrap gap-2">
-        <button onclick="toggleFullscreen()" class="bg-indigo-500 hover:bg-indigo-400 text-white font-semibold px-3 py-2 rounded-xl text-xs sm:text-sm shadow flex items-center gap-1.5 transition-colors">
+        <!-- Wird im PWA-Modus automatisch ausgeblendet -->
+        <button id="btn_fullscreen" onclick="toggleFullscreen()" class="bg-indigo-500 hover:bg-indigo-400 text-white font-semibold px-3 py-2 rounded-xl text-xs sm:text-sm shadow transition-colors">
           Vollbild
         </button>
         <button onclick="downloadApp()" class="bg-white text-indigo-700 hover:bg-indigo-50 font-semibold px-3 py-2 rounded-xl text-xs sm:text-sm shadow transition-colors">
@@ -122,7 +123,7 @@
       </div>
     </section>
 
-    <!-- Installations-Button (nur anzeigen, wenn installierbar oder als Hilfestellung) -->
+    <!-- Installations-Sektion (wird im PWA-Modus automatisch ausgeblendet) -->
     <section id="install_section" class="bg-gradient-to-r from-indigo-500 to-purple-600 p-5 rounded-2xl shadow-md text-white flex flex-col sm:flex-row justify-between items-center gap-4">
       <div>
         <h3 class="font-bold text-lg">Als App auf dem Gerät nutzen</h3>
@@ -445,7 +446,18 @@
       }
     }
 
-    // PWA-Logik mit echter Manifest-Unterstützung
+    // --- Smart PWA UI Logic ---
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+
+    if (isStandalone) {
+      // Wenn als App geöffnet: Installations-Sektion und Vollbild-Button unsichtbar schalten
+      const installSec = document.getElementById('install_section');
+      if (installSec) installSec.style.display = 'none';
+
+      const btnFull = document.getElementById('btn_fullscreen');
+      if (btnFull) btnFull.style.display = 'none';
+    }
+
     let deferredPrompt = null;
     const btnInstall = document.getElementById('btn_install');
     const iosModal = document.getElementById('ios_modal');
@@ -455,18 +467,20 @@
       deferredPrompt = e;
     });
 
-    btnInstall.addEventListener('click', async () => {
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-      if (isIOS) {
-        iosModal.classList.remove('hidden');
-      } else if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        deferredPrompt = null;
-      } else {
-        iosModal.classList.remove('hidden');
-      }
-    });
+    if (btnInstall) {
+      btnInstall.addEventListener('click', async () => {
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        if (isIOS) {
+          iosModal.classList.remove('hidden');
+        } else if (deferredPrompt) {
+          deferredPrompt.prompt();
+          await deferredPrompt.userChoice;
+          deferredPrompt = null;
+        } else {
+          iosModal.classList.remove('hidden');
+        }
+      });
+    }
 
     function closeModal() {
       iosModal.classList.add('hidden');
