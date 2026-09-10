@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rohr-Etagenberechnung v0.3.0</title>
+  <title>Rohr-Etagenberechnung v0.3.1</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- PWA Manifest & Theme -->
   <link rel="manifest" href="manifest.json">
@@ -13,10 +13,10 @@
 
   <div class="max-w-3xl mx-auto space-y-5 w-full">
     
-    <!-- Header mit Version v0.3.0 -->
+    <!-- Header mit Version v0.3.1 -->
     <header class="bg-indigo-600 text-white p-5 sm:p-6 rounded-2xl shadow-md">
       <h1 class="text-2xl font-bold">Rohr-Etagenberechnung</h1>
-      <p class="text-indigo-100 text-xs sm:text-sm mt-0.5">Version v0.3.0 &bull; Echte PWA mit Service Worker</p>
+      <p class="text-indigo-100 text-xs sm:text-sm mt-0.5">Version v0.3.1 &bull; Mit maßgeschneidertem App-Icon & lückenlosem Logbuch</p>
     </header>
 
     <!-- Grafische Visualisierung -->
@@ -118,7 +118,7 @@
     </button>
     <!-- Änderungslog -->
     <button onclick="openChangelog()" class="bg-slate-700 hover:bg-slate-600 text-white font-semibold px-4 py-3 rounded-xl text-sm shadow transition-colors flex items-center justify-center gap-1.5">
-      📜 Änderungslog (v0.3.0)
+      📜 Änderungslog (v0.3.1)
     </button>
     <!-- HTML Speichern -->
     <button onclick="downloadApp()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-4 py-3 rounded-xl text-sm shadow transition-colors flex items-center justify-center gap-1.5">
@@ -126,21 +126,29 @@
     </button>
   </footer>
 
-  <!-- Changelog Modal (Logbuch) -->
+  <!-- Changelog Modal (Lückenloses Logbuch) -->
   <div id="changelog_modal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl p-6 max-w-lg w-full space-y-4 text-slate-800 shadow-2xl max-h-[85vh] flex flex-col">
       <div class="flex justify-between items-center border-b pb-3">
-        <h3 class="font-bold text-lg text-indigo-600">📜 Projekt-Logbuch (Changelog)</h3>
+        <h3 class="font-bold text-lg text-indigo-600">📜 Projekt-Logbuch (Vollständige Historie)</h3>
         <button onclick="closeChangelog()" class="text-slate-400 hover:text-slate-700 font-bold text-xl px-2">&times;</button>
       </div>
       <div class="overflow-y-auto space-y-3 pr-1 text-sm text-slate-600 flex-1">
         
         <div class="p-3 bg-slate-50 rounded-xl border-l-4 border-indigo-500">
           <div class="flex justify-between font-bold text-slate-700 text-xs">
+            <span>Version v0.3.1</span>
+            <span>10.09.2026, 12:38 Uhr</span>
+          </div>
+          <p class="mt-1">Maßgeschneidertes, professionelles Rohr-Etagen-App-Icon im Manifest hinterlegt; vollständiges und lückenloses historisches Changelog implementiert.</p>
+        </div>
+
+        <div class="p-3 bg-slate-50 rounded-xl border-l-4 border-indigo-500">
+          <div class="flex justify-between font-bold text-slate-700 text-xs">
             <span>Version v0.3.0</span>
             <span>10.09.2026, 12:17 Uhr</span>
           </div>
-          <p class="mt-1">Echte PWA-Infrastruktur mit Service Worker (`sw.js`) und optimiertem Manifest inklusive Icons hinzugefügt, um die Installation in Google Chrome zu ermöglichen.</p>
+          <p class="mt-1">Echte PWA-Infrastruktur mit Service Worker (`sw.js`) eingeführt, erfolgreiche Installation in Chrome & Firefox verifiziert.</p>
         </div>
 
         <div class="p-3 bg-slate-50 rounded-xl border-l-4 border-slate-400">
@@ -148,7 +156,79 @@
             <span>Version v0.2.9</span>
             <span>10.09.2026, 12:04 Uhr</span>
           </div>
-          <p class="mt-1">Stabiler Hell-Modus optimiert; experimenteller Dark Mode zurückgebaut.</p>
+          <p class="mt-1">Rückkehr zu stabilem Hell-Modus nach Samsung-Browser-Invertierungstests; fehlerfreie Basis etabliert.</p>
+        </div>
+
+        <div class="p-3 bg-slate-50 rounded-xl border-l-4 border-amber-500">
+          <div class="flex justify-between font-bold text-slate-700 text-xs">
+            <span>Version v0.2.8</span>
+            <span>10.09.2026, 12:00 Uhr</span>
+          </div>
+          <p class="mt-1">Default-Dark-Mode-Experiment zur Umgehung von Browser-Invertierungsfiltern durchgeführt.</p>
+        </div>
+
+        <div class="p-3 bg-slate-50 rounded-xl border-l-4 border-amber-500">
+          <div class="flex justify-between font-bold text-slate-700 text-xs">
+            <span>Version v0.2.7</span>
+            <span>10.09.2026, 11:55 Uhr</span>
+          </div>
+          <p class="mt-1">CSS-Spezifitäts-Overrides (`!important`) gegen erzwungene Browser-Dark-Modes getestet.</p>
+        </div>
+
+        <div class="p-3 bg-slate-50 rounded-xl border-l-4 border-amber-500">
+          <div class="flex justify-between font-bold text-slate-700 text-xs">
+            <span>Version v0.2.6</span>
+            <span>10.09.2026, 11:51 Uhr</span>
+          </div>
+          <p class="mt-1">Meta-Tag Steuerung (`color-scheme`) zur Unterdrückung von Browser-Invertierungen eingebaut.</p>
+        </div>
+
+        <div class="p-3 bg-slate-50 rounded-xl border-l-4 border-amber-500">
+          <div class="flex justify-between font-bold text-slate-700 text-xs">
+            <span>Version v0.2.5</span>
+            <span>10.09.2026, 11:36 Uhr</span>
+          </div>
+          <p class="mt-1">Manueller Dark-Mode-Umschalter im Footer für Werkstatt-Einsätze hinzugefügt.</p>
+        </div>
+
+        <div class="p-3 bg-slate-50 rounded-xl border-l-4 border-emerald-500">
+          <div class="flex justify-between font-bold text-slate-700 text-xs">
+            <span>Version v0.2.4</span>
+            <span>10.09.2026, 11:13 Uhr</span>
+          </div>
+          <p class="mt-1">PWA-Installations-Button im Footer hinzugefügt; blendet sich im installierten App-Modus automatisch aus.</p>
+        </div>
+
+        <div class="p-3 bg-slate-50 rounded-xl border-l-4 border-slate-400">
+          <div class="flex justify-between font-bold text-slate-700 text-xs">
+            <span>Version v0.2.3</span>
+            <span>10.09.2026, 11:08 Uhr</span>
+          </div>
+          <p class="mt-1">Änderungslog-Button in den Footer versetzt.</p>
+        </div>
+
+        <div class="p-3 bg-slate-50 rounded-xl border-l-4 border-slate-400">
+          <div class="flex justify-between font-bold text-slate-700 text-xs">
+            <span>Version v0.2.2</span>
+            <span>10.09.2026, 11:04 Uhr</span>
+          </div>
+          <p class="mt-1">Integriertes Changelog-Logbuch per Button hinzugefügt; Semantic Versioning eingeführt.</p>
+        </div>
+
+        <div class="p-3 bg-slate-50 rounded-xl border-l-4 border-slate-400">
+          <div class="flex justify-between font-bold text-slate-700 text-xs">
+            <span>Version v0.2.1</span>
+            <span>10.09.2026, 11:02 Uhr</span>
+          </div>
+          <p class="mt-1">Vollbild-Button entfernt; „HTML Speichern“-Button in den Footer verschoben.</p>
+        </div>
+
+        <div class="p-3 bg-slate-50 rounded-xl border-l-4 border-slate-400">
+          <div class="flex justify-between font-bold text-slate-700 text-xs">
+            <span>Version v0.2.0</span>
+            <span>10.09.2026, 10:55 Uhr</span>
+          </div>
+          <p class="mt-1">Stabiles Basis-Setup mit LocalStorage, SVG-Isometrie und Berechnungslogik etabliert.</p>
         </div>
 
       </div>
