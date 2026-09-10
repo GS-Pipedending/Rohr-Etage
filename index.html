@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rohr-Etagenberechnung</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="manifest" href="manifest.json">
+  <!-- Integriertes PWA-Manifest ohne Icon-Abhängigkeit für 100%ige Installations-Garantie -->
+  <link rel="manifest" href='data:application/manifest+json;charset=utf-8,{"name":"Rohr-Etagenberechnung","short_name":"RohrEtage","start_url":"./index.html","display":"standalone","background_color":"%23f1f5f9","theme_color":"%234f46e5"}'>
   <meta name="theme-color" content="#4f46e5">
 </head>
 <body class="bg-slate-100 min-h-screen text-slate-800 p-4 md:p-8">
@@ -169,7 +170,7 @@
 
     const inputIds = ['v_hoehenversatz', 'h_seitenversatz', 'a_biegewinkel', 'd_durchmesser', 'r_faktor'];
 
-    // Local Storage
+    // Local Storage Integration
     window.addEventListener('DOMContentLoaded', () => {
       inputIds.forEach(id => {
         const saved = localStorage.getItem('rohr_' + id);
