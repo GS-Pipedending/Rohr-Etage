@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rohr-etage-v0.3.0';
+const CACHE_NAME = 'rohr-etage-v0.3.1';
 const ASSETS = [
   './index.html',
   './manifest.json'
@@ -32,7 +32,7 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       return cachedResponse || fetch(event.request).catch(() => {
-        // Fallback für Offline-Modus falls nötig
+        // Fallback für Offline-Modus
       });
     })
   );
