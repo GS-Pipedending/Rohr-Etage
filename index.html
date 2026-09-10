@@ -3,6 +3,473 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rohr-Etagenberechnung v0.3.0</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- PWA Manifest & Theme -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#4f46e5">
+</head>
+<body class="bg-slate-100 min-h-screen text-slate-800 p-4 md:p-8 flex flex-col justify-between">
+
+  <div class="max-w-3xl mx-auto space-y-5 w-full">
+    
+    <!-- Header mit Version v0.3.0 -->
+    <header class="bg-indigo-600 text-white p-5 sm:p-6 rounded-2xl shadow-md">
+      <h1 class="text-2xl font-bold">Rohr-Etagenberechnung</h1>
+      <p class="text-indigo-100 text-xs sm:text-sm mt-0.5">Version v0.3.0 &bull; Echte PWA mit Service Worker</p>
+    </header>
+
+    <!-- Grafische Visualisierung -->
+    <section class="bg-white p-4 sm:p-5 rounded-2xl shadow-sm flex flex-col items-center">
+      <div class="w-full flex justify-between items-center mb-1.5">
+        <h2 class="text-xs font-semibold text-slate-500 uppercase tracking-wider">3D-Isometrie Modell</h2>
+      </div>
+      <div class="w-full h-[260px] sm:h-[340px] bg-slate-50 rounded-xl border border-slate-200 overflow-hidden flex items-center justify-center shadow-inner">
+        <svg id="svg_sketch" viewBox="0 0 1000 580" class="w-full h-full">
+          <g id="gfx_container"></g>
+        </svg>
+      </div>
+    </section>
+
+    <!-- Eingabe-Bereich -->
+    <section class="bg-white p-5 rounded-2xl shadow-sm space-y-4">
+      <h2 class="text-lg font-semibold text-slate-700 border-b pb-2">Eingabewerte</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Höhenversatz (V)</label>
+          <div class="relative">
+            <input type="text" id="v_hoehenversatz" value="500" placeholder="0" inputmode="decimal" class="w-full bg-slate-50 border-l-4 border-l-emerald-500 border-slate-300 rounded-lg p-2.5 pr-12 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+            <span class="absolute right-3 top-2.5 font-bold text-slate-500 text-sm">mm</span>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Seitenversatz (h)</label>
+          <div class="relative">
+            <input type="text" id="h_seitenversatz" value="500" placeholder="0" inputmode="decimal" class="w-full bg-slate-50 border-l-4 border-l-sky-500 border-slate-300 rounded-lg p-2.5 pr-12 focus:ring-2 focus:ring-sky-500 focus:outline-none">
+            <span class="absolute right-3 top-2.5 font-bold text-slate-500 text-sm">mm</span>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Biegewinkel (a)</label>
+          <div class="relative">
+            <input type="text" id="a_biegewinkel" value="90" placeholder="0" inputmode="decimal" class="w-full bg-slate-50 border-l-4 border-l-amber-500 border-slate-300 rounded-lg p-2.5 pr-12 focus:ring-2 focus:ring-amber-500 focus:outline-none">
+            <span class="absolute right-3 top-2.5 font-bold text-slate-500 text-sm">°</span>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Außendurchmesser Rohr (d)</label>
+          <div class="relative">
+            <input type="text" id="d_durchmesser" value="30" placeholder="0" inputmode="decimal" class="w-full bg-slate-50 border-l-4 border-l-slate-400 border-slate-300 rounded-lg p-2.5 pr-12 focus:ring-2 focus:ring-slate-500 focus:outline-none">
+            <span class="absolute right-3 top-2.5 text-slate-400 text-sm">mm</span>
+          </div>
+        </div>
+
+        <div class="sm:col-span-2">
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Radius Faktor</label>
+          <select id="r_faktor" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            <option value="2">2</option>
+            <option value="3" selected>3</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <!-- Ausgabe-Bereich -->
+    <section class="bg-white p-5 rounded-2xl shadow-sm space-y-4">
+      <h2 class="text-lg font-semibold text-slate-700 border-b pb-2">Ergebnisse</h2>
+      <div class="space-y-3">
+        <div class="p-4 bg-red-50/50 rounded-xl border-l-4 border-red-500">
+          <div class="text-xs font-semibold text-red-800 uppercase tracking-wider">Kombinierter Versatz im Raum (C)</div>
+          <div id="out_c" class="text-xl font-bold text-red-950 mt-0.5">0 mm</div>
+        </div>
+
+        <div class="p-4 bg-orange-50 rounded-xl border-l-4 border-orange-500 shadow-sm">
+          <div class="text-xs font-bold text-orange-800 uppercase tracking-wider">Theoretische Schräglänge (R)</div>
+          <div id="out_schraeglaenge" class="text-xl font-bold text-orange-950 mt-0.5">0 mm</div>
+        </div>
+
+        <div class="p-4 bg-pink-50/50 rounded-xl border-l-4 border-pink-500">
+          <div class="text-xs font-semibold text-pink-800 uppercase tracking-wider">Nachziehlänge (T)</div>
+          <div id="out_t" class="text-xl font-bold text-pink-950 mt-0.5">0 mm</div>
+        </div>
+
+        <div class="p-4 bg-purple-50/50 rounded-xl border-l-4 border-purple-500">
+          <div class="text-xs font-semibold text-purple-800 uppercase tracking-wider">Verdrehwinkel für die Biegung (f)</div>
+          <div id="out_f" class="text-xl font-bold text-purple-950 mt-0.5">0 °</div>
+        </div>
+
+        <div class="p-4 bg-emerald-50/50 rounded-xl border-l-4 border-emerald-500">
+          <div class="text-xs font-semibold text-emerald-800 uppercase tracking-wider">Anreisumfangmaß</div>
+          <div id="out_anreisumfang" class="text-xl font-bold text-emerald-950 mt-0.5">0 mm</div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Footer mit Aktions-Buttons -->
+  <footer class="max-w-3xl mx-auto w-full mt-8 pt-4 border-t border-slate-300 flex flex-wrap justify-center gap-3">
+    <!-- PWA Installations-Button -->
+    <button id="btn_install" style="display: none;" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-4 py-3 rounded-xl text-sm shadow transition-colors flex items-center justify-center gap-1.5">
+      📱 App installieren
+    </button>
+    <!-- Änderungslog -->
+    <button onclick="openChangelog()" class="bg-slate-700 hover:bg-slate-600 text-white font-semibold px-4 py-3 rounded-xl text-sm shadow transition-colors flex items-center justify-center gap-1.5">
+      📜 Änderungslog (v0.3.0)
+    </button>
+    <!-- HTML Speichern -->
+    <button onclick="downloadApp()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-4 py-3 rounded-xl text-sm shadow transition-colors flex items-center justify-center gap-1.5">
+      💾 HTML Speichern
+    </button>
+  </footer>
+
+  <!-- Changelog Modal (Logbuch) -->
+  <div id="changelog_modal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl p-6 max-w-lg w-full space-y-4 text-slate-800 shadow-2xl max-h-[85vh] flex flex-col">
+      <div class="flex justify-between items-center border-b pb-3">
+        <h3 class="font-bold text-lg text-indigo-600">📜 Projekt-Logbuch (Changelog)</h3>
+        <button onclick="closeChangelog()" class="text-slate-400 hover:text-slate-700 font-bold text-xl px-2">&times;</button>
+      </div>
+      <div class="overflow-y-auto space-y-3 pr-1 text-sm text-slate-600 flex-1">
+        
+        <div class="p-3 bg-slate-50 rounded-xl border-l-4 border-indigo-500">
+          <div class="flex justify-between font-bold text-slate-700 text-xs">
+            <span>Version v0.3.0</span>
+            <span>10.09.2026, 12:17 Uhr</span>
+          </div>
+          <p class="mt-1">Echte PWA-Infrastruktur mit Service Worker (`sw.js`) und optimiertem Manifest inklusive Icons hinzugefügt, um die Installation in Google Chrome zu ermöglichen.</p>
+        </div>
+
+        <div class="p-3 bg-slate-50 rounded-xl border-l-4 border-slate-400">
+          <div class="flex justify-between font-bold text-slate-700 text-xs">
+            <span>Version v0.2.9</span>
+            <span>10.09.2026, 12:04 Uhr</span>
+          </div>
+          <p class="mt-1">Stabiler Hell-Modus optimiert; experimenteller Dark Mode zurückgebaut.</p>
+        </div>
+
+      </div>
+      <button onclick="closeChangelog()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2.5 rounded-xl text-sm transition-colors">
+        Schließen
+      </button>
+    </div>
+  </div>
+
+  <!-- iOS Installations-Anleitungs-Modal -->
+  <div id="ios_modal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl p-6 max-w-sm w-full space-y-4 text-slate-800 shadow-xl">
+      <h3 class="font-bold text-lg text-emerald-600">Auf iPhone / iPad installieren</h3>
+      <p class="text-sm text-slate-600">Tippe unten in Safari auf das <strong>Teilen-Symbol</strong> und wähle <strong>„Zum Home-Bildschirm“</strong>.</p>
+      <button onclick="closeIosModal()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2.5 rounded-xl text-sm transition-colors">
+        Verstanden
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // --- Service Worker Registrierung ---
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then((reg) => { console.log('ServiceWorker registriert:', reg.scope); })
+          .catch((err) => { console.log('ServiceWorker Fehler:', err); });
+      });
+    }
+
+    // --- PWA Installations-Logik ---
+    let deferredPrompt = null;
+    const btnInstall = document.getElementById('btn_install');
+    const iosModal = document.getElementById('ios_modal');
+
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
+    if (!isStandalone) {
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        btnInstall.style.display = 'flex';
+      });
+
+      setTimeout(() => {
+        if (btnInstall.style.display === 'none') {
+          btnInstall.style.display = 'flex';
+        }
+      }, 1000);
+    }
+
+    if (btnInstall) {
+      btnInstall.addEventListener('click', async () => {
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        if (isIOS) {
+          iosModal.classList.remove('hidden');
+        } else if (deferredPrompt) {
+          deferredPrompt.prompt();
+          const choiceResult = await deferredPrompt.userChoice;
+          if (choiceResult.outcome === 'accepted') {
+            btnInstall.style.display = 'none';
+          }
+          deferredPrompt = null;
+        } else {
+          alert('Öffne das Browser-Menü (oben rechts die 3 Punkte) und wähle „App installieren“ oder „Zum Startbildschirm hinzufügen“.');
+        }
+      });
+    }
+
+    function closeIosModal() { iosModal.classList.add('hidden'); }
+
+    function openChangelog() {
+      document.getElementById('changelog_modal').classList.remove('hidden');
+    }
+    function closeChangelog() {
+      document.getElementById('changelog_modal').classList.add('hidden');
+    }
+
+    const toRad = (deg) => (deg * Math.PI) / 180;
+    const toDeg = (rad) => (rad * 180) / Math.PI;
+    const roundInt = (val) => Math.round(val);
+
+    function downloadApp() {
+      const htmlContent = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+      const blob = new Blob([htmlContent], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'index.html';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    const inputIds = ['v_hoehenversatz', 'h_seitenversatz', 'a_biegewinkel', 'd_durchmesser', 'r_faktor'];
+
+    // Local Storage Integration
+    window.addEventListener('DOMContentLoaded', () => {
+      inputIds.forEach(id => {
+        const saved = localStorage.getItem('rohr_' + id);
+        if (saved !== null) {
+          const el = document.getElementById(id);
+          if (el) el.value = saved;
+        }
+      });
+      calculate();
+    });
+
+    inputIds.forEach(id => {
+      const el = document.getElementById(id);
+      if(el) {
+        el.addEventListener('input', function() {
+          if (id === 'a_biegewinkel') {
+            let val = parseFloat(this.value.replace(',', '.')) || 0;
+            if (val < 0) this.value = '0';
+            if (val > 360) this.value = '360';
+          }
+          localStorage.setItem('rohr_' + id, el.value);
+          calculate();
+        });
+        el.addEventListener('change', () => {
+          localStorage.setItem('rohr_' + id, el.value);
+          calculate();
+        });
+        el.addEventListener('focus', function() {
+          setTimeout(() => { this.setSelectionRange(0, 9999); }, 50);
+        });
+      }
+    });
+
+    function calculate() {
+      const v = parseFloat(document.getElementById('v_hoehenversatz').value.replace(',', '.')) || 0;
+      const h = parseFloat(document.getElementById('h_seitenversatz').value.replace(',', '.')) || 0;
+      const a = parseFloat(document.getElementById('a_biegewinkel').value.replace(',', '.')) || 0;
+      const d = parseFloat(document.getElementById('d_durchmesser').value.replace(',', '.')) || 0;
+      const rFaktor = parseFloat(document.getElementById('r_faktor').value) || 3;
+
+      const rBiege = d * rFaktor;
+      const c = roundInt(Math.sqrt((h * h) + (v * v)));
+
+      let schraeglaenge = 0;
+      let t = 0;
+
+      if (a !== 0) {
+        if (Math.abs(a - 90) < 0.001) {
+          schraeglaenge = 0;
+          const radHalfA = toRad(45);
+          const abzug = 2 * rBiege * (Math.tan(radHalfA) - toRad(45));
+          t = roundInt(c - abzug);
+        } else {
+          schraeglaenge = roundInt(c / Math.sin(toRad(a)));
+          const radHalfA = toRad(a / 2);
+          const abzug = 2 * rBiege * (Math.tan(radHalfA) - radHalfA);
+          t = roundInt(schraeglaenge - abzug);
+        }
+      }
+
+      let f = 0;
+      if (v !== 0 || h !== 0) {
+        f = roundInt(toDeg(Math.atan2(h, v)));
+      }
+
+      const anreisumfang = roundInt((d * Math.PI * Math.abs(f)) / 360);
+
+      document.getElementById('out_c').textContent = c.toLocaleString('de-DE') + ' mm';
+      document.getElementById('out_schraeglaenge').textContent = schraeglaenge.toLocaleString('de-DE') + ' mm';
+      document.getElementById('out_t').textContent = t.toLocaleString('de-DE') + ' mm';
+      document.getElementById('out_f').textContent = f.toLocaleString('de-DE') + ' °';
+      document.getElementById('out_anreisumfang').textContent = anreisumfang.toLocaleString('de-DE') + ' mm';
+
+      drawBoxAndLines(v, h, a, c, schraeglaenge, t);
+    }
+
+    function drawBoxAndLines(v, h, a, c, schraeglaenge, t) {
+      const container = document.getElementById('gfx_container');
+      container.innerHTML = '';
+
+      const originX = 540;
+      const originY = 550;
+
+      const safeV = v > 0 ? v : 100;
+      const safeH = h > 0 ? h : 100;
+      const safeC = c > 0 ? c : 100;
+
+      const maxVal = Math.max(safeV, safeH, safeC, 1);
+      const scale = Math.min(360 / maxVal, 2.2);
+
+      const pxH = safeH * scale;
+      const pxV = safeV * scale;
+      const depthVal = a > 0 && Math.abs(a - 90) >= 0.001 ? (safeC / Math.tan(toRad(a))) : safeC;
+      const pxT = Math.min(Math.max((depthVal > 0 ? depthVal : 100) * scale, 120), 400);
+
+      const isoCos = Math.cos(toRad(30));
+      const isoSin = Math.sin(toRad(30));
+
+      const A = { x: originX, y: originY };
+      const B = { x: A.x + pxH * isoCos, y: A.y - pxH * isoSin };
+      const C_pt = { x: B.x, y: B.y - pxV };
+      const D = { x: A.x, y: A.y - pxV };
+
+      const A_back = { x: A.x - pxT * isoCos, y: A.y - pxT * isoSin };
+      const B_back_fixed = { x: B.x - pxT * isoCos, y: B.y - pxT * isoSin };
+      const C_back = { x: C_pt.x - pxT * isoCos, y: C_pt.y - pxT * isoSin };
+      const D_back = { x: D.x - pxT * isoCos, y: D.y - pxT * isoSin };
+
+      const extLen = 100;
+      const P_in = { x: A_back.x - extLen * isoCos, y: A_back.y - extLen * isoSin };
+      const P_out = { x: C_pt.x + extLen * isoCos, y: C_pt.y + extLen * isoSin };
+
+      const createLine = (p1, p2, color = '#64748b', width = '3', dash = '6,6') => {
+        const el = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        el.setAttribute('x1', p1.x); el.setAttribute('y1', p1.y);
+        el.setAttribute('x2', p2.x); el.setAttribute('y2', p2.y);
+        el.setAttribute('stroke', color);
+        el.setAttribute('stroke-width', width);
+        if (dash) el.setAttribute('stroke-dasharray', dash);
+        return el;
+      };
+
+      const createTextLabel = (text, p, color, offsetX = 0, offsetY = 0, fontSize = '48') => {
+        const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        txt.setAttribute('x', p.x + offsetX); txt.setAttribute('y', p.y + offsetY);
+        txt.setAttribute('fill', color);
+        txt.setAttribute('font-size', fontSize);
+        txt.setAttribute('font-weight', '900');
+        txt.setAttribute('text-anchor', 'middle');
+        txt.setAttribute('dominant-baseline', 'central');
+        txt.textContent = text;
+        return txt;
+      };
+
+      container.appendChild(createLine(A, B));
+      container.appendChild(createLine(B, C_pt));
+      container.appendChild(createLine(C_pt, D));
+      container.appendChild(createLine(D, A));
+      container.appendChild(createLine(A_back, B_back_fixed));
+      container.appendChild(createLine(B_back_fixed, C_back));
+      container.appendChild(createLine(C_back, D_back));
+      container.appendChild(createLine(D_back, A_back));
+      container.appendChild(createLine(A, A_back));
+      container.appendChild(createLine(B, B_back_fixed));
+      container.appendChild(createLine(C_pt, C_back));
+      container.appendChild(createLine(D, D_back));
+
+      if (a > 0) {
+        const arcGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        const vR = { x: A.x - A_back.x, y: A.y - A_back.y };
+        const vT = { x: C_pt.x - A_back.x, y: C_pt.y - A_back.y };
+        const lenR = Math.sqrt(vR.x * vR.x + vR.y * vR.y);
+        const lenT = Math.sqrt(vT.x * vT.x + vT.y * vT.y);
+        const rArc = 180;
+        const pR = { x: A_back.x + (vR.x / lenR) * rArc, y: A_back.y + (vR.y / lenR) * rArc };
+        const pT = { x: A_back.x + (vT.x / lenT) * rArc, y: A_back.y + (vT.y / lenT) * rArc };
+
+        const wedge = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+        wedge.setAttribute('points', `${A_back.x},${A_back.y} ${pR.x},${pR.y} ${pT.x},${pT.y}`);
+        wedge.setAttribute('fill', 'rgba(254, 240, 138, 0.6)');
+        wedge.setAttribute('stroke', '#ca8a04');
+        wedge.setAttribute('stroke-width', '2.5');
+        arcGroup.appendChild(wedge);
+
+        const midX = (vR.x / lenR + vT.x / lenT) / 2;
+        const midY = (vR.y / lenR + vT.y / lenT) / 2;
+        const midLen = Math.sqrt(midX * midX + midY * midY);
+        arcGroup.appendChild(createTextLabel(`${a}°`, { x: A_back.x + (midX / midLen) * 100, y: A_back.y + (midY / midLen) * 100 }, '#854d0e', 0, 0, '40'));
+        container.appendChild(arcGroup);
+      }
+
+      const pipeGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      const dPath = `M ${P_in.x} ${P_in.y} L ${A_back.x} ${A_back.y} L ${C_pt.x} ${C_pt.y} L ${P_out.x} ${P_out.y}`;
+
+      const pipeOuter = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      pipeOuter.setAttribute('d', dPath); pipeOuter.setAttribute('fill', 'none');
+      pipeOuter.setAttribute('stroke', '#64748b'); pipeOuter.setAttribute('stroke-width', '36');
+      pipeOuter.setAttribute('stroke-linejoin', 'round'); pipeOuter.setAttribute('opacity', '0.7');
+
+      const pipeInner = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      pipeInner.setAttribute('d', dPath); pipeInner.setAttribute('fill', 'none');
+      pipeInner.setAttribute('stroke', '#e2e8f0'); pipeInner.setAttribute('stroke-width', '22');
+      pipeInner.setAttribute('stroke-linejoin', 'round');
+
+      const createPipeEnd = (p) => {
+        const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        const outerRing = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
+        outerRing.setAttribute('cx', p.x); outerRing.setAttribute('cy', p.y);
+        outerRing.setAttribute('rx', '13'); outerRing.setAttribute('ry', '18');
+        outerRing.setAttribute('fill', '#94a3b8'); outerRing.setAttribute('stroke', '#475569'); outerRing.setAttribute('stroke-width', '3');
+        const innerHole = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
+        innerHole.setAttribute('cx', p.x); innerHole.setAttribute('cy', p.y);
+        innerHole.setAttribute('rx', '7'); innerHole.setAttribute('ry', '11');
+        innerHole.setAttribute('fill', '#334155');
+        g.appendChild(outerRing); g.appendChild(innerHole);
+        return g;
+      };
+
+      pipeGroup.appendChild(pipeOuter);
+      pipeGroup.appendChild(pipeInner);
+      pipeGroup.appendChild(createPipeEnd(P_in));
+      pipeGroup.appendChild(createPipeEnd(P_out));
+      container.appendChild(pipeGroup);
+
+      if (h > 0) container.appendChild(createLine(A, B, '#0284c7', '6', null));
+      if (v > 0) container.appendChild(createLine(B, C_pt, '#16a34a', '6', null));
+      if (c > 0) container.appendChild(createLine(A, C_pt, '#dc2626', '6', null));
+      if (Math.abs(a - 90) >= 0.001 && pxT > 0) container.appendChild(createLine(A_back, A, '#ea580c', '6', null));
+      if (t > 0 || a > 0) container.appendChild(createLine(A_back, C_pt, '#ec4899', '6', null));
+
+      if (h > 0) container.appendChild(createTextLabel('h', { x: (A.x + B.x) / 2, y: (A.y + B.y) / 2 }, '#0284c7', 20, 28));
+      if (v > 0) container.appendChild(createTextLabel('V', { x: (B.x + C_pt.x) / 2, y: (B.y + C_pt.y) / 2 }, '#16a34a', 28, 0));
+      if (c > 0) container.appendChild(createTextLabel('C', { x: (A.x + C_pt.x) / 2, y: (A.y + C_pt.x) / 2 }, '#dc2626', -25, -18));
+      if (Math.abs(a - 90) >= 0.001 && pxT > 0) container.appendChild(createTextLabel('R', { x: (A_back.x + A.x) / 2, y: (A_back.y + A.y) / 2 }, '#ea580c', -25, 28));
+      if (t > 0 || a > 0) container.appendChild(createTextLabel('T', { x: (A_back.x + C_pt.x) / 2, y: (A_back.y + C_pt.y) / 2 }, '#ec4899', 0, -28));
+    }
+  </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rohr-Etagenberechnung v0.2.4</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- PWA Manifest Verknüpfung -->
