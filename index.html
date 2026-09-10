@@ -32,7 +32,7 @@
     <header class="bg-indigo-600 text-white p-5 sm:p-6 rounded-2xl shadow-md flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
       <div>
         <h1 class="text-2xl font-bold">Rohr-Etagenberechnung</h1>
-        <p class="text-indigo-100 text-sm mt-0.5">Stabile Version (inkl. PWA) &bull; Stand: 09.09.2026, 20:50 Uhr</p>
+        <p class="text-indigo-100 text-sm mt-0.5">Stabile Version (PWA erzwungen) &bull; Stand: 10.09.2026, 07:26 Uhr</p>
       </div>
       <div class="flex flex-wrap gap-2">
         <button onclick="toggleFullscreen()" class="bg-indigo-500 hover:bg-indigo-400 text-white font-semibold px-3 py-2 rounded-xl text-xs sm:text-sm shadow flex items-center gap-1.5 transition-colors">
@@ -142,8 +142,8 @@
       </div>
     </section>
 
-    <!-- NEU: Web-App Installieren Button -->
-    <section id="install_section" class="hidden bg-gradient-to-r from-indigo-500 to-purple-600 p-5 rounded-2xl shadow-md text-white flex flex-col sm:flex-row justify-between items-center gap-4">
+    <!-- IMMER SICHTBAR: Web-App Installieren Button -->
+    <section id="install_section" class="bg-gradient-to-r from-indigo-500 to-purple-600 p-5 rounded-2xl shadow-md text-white flex flex-col sm:flex-row justify-between items-center gap-4">
       <div>
         <h3 class="font-bold text-lg">App auf dem Gerät installieren</h3>
         <p class="text-indigo-100 text-xs mt-0.5">Für den schnellen Zugriff direkt vom Startbildschirm in der Werkstatt.</p>
@@ -155,16 +155,12 @@
 
   </div>
 
-  <!-- iOS Installations-Modal (Anleitung) -->
+  <!-- Installations / Anleitung-Modal -->
   <div id="ios_modal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl p-6 max-w-sm w-full space-y-4 text-slate-800 shadow-xl">
-      <h3 class="font-bold text-lg text-indigo-600">Auf iPhone / iPad installieren</h3>
-      <p class="text-sm text-slate-600">Um diese App zum Startbildschirm hinzuzufügen, tippe unten in Safari auf das <strong>Teilen-Symbol</strong> (Viereck mit Pfeil nach oben) und wähle:</p>
-      <div class="bg-slate-100 p-3 rounded-xl font-semibold text-sm flex items-center gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-        „Zum Home-Bildschirm“
-      </div>
-      <button onclick="closeIosModal()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2.5 rounded-xl text-sm transition-colors">
+      <h3 id="modal_title" class="font-bold text-lg text-indigo-600">App installieren</h3>
+      <p id="modal_text" class="text-sm text-slate-600">Tippe unten in deinem Browser-Menü auf <strong>„Zum Startbildschirm hinzufügen“</strong> (oder „App installieren“), um die App einzurichten.</p>
+      <button onclick="closeModal()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2.5 rounded-xl text-sm transition-colors">
         Verstanden
       </button>
     </div>
@@ -469,48 +465,39 @@
       }
     }
 
-    // --- PWA Installations-Logik ---
+    // --- PWA Installations-Logik (Erzwungener Button) ---
     let deferredPrompt = null;
-    const installSection = document.getElementById('install_section');
     const btnInstall = document.getElementById('btn_install');
     const iosModal = document.getElementById('ios_modal');
+    const modalTitle = document.getElementById('modal_title');
+    const modalText = document.getElementById('modal_text');
 
-    // Prüfen, ob es ein iOS Gerät ist
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    // Prüfen, ob die App bereits im Standalone-Modus läuft
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
 
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
-      if (!isStandalone) {
-        installSection.classList.remove('hidden'); // Button auf Android/Chrome anzeigen
-      }
     });
 
     btnInstall.addEventListener('click', async () => {
       if (isIOS) {
-        iosModal.classList.remove('hidden'); // iOS Anleitung öffnen
+        modalTitle.textContent = "Auf iPhone / iPad installieren";
+        modalText.innerHTML = "Tippe unten in Safari auf das <strong>Teilen-Symbol</strong> (Viereck mit Pfeil nach oben) und wähle <strong>„Zum Home-Bildschirm“</strong>.";
+        iosModal.classList.remove('hidden');
       } else if (deferredPrompt) {
         deferredPrompt.prompt();
         const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === 'accepted') {
-          installSection.classList.add('hidden');
-        }
         deferredPrompt = null;
       } else {
-        // Fallback, falls der Browser kein Event feuert, aber PWA unterstützt
-        alert('Um diese App zu installieren, nutze die Menü-Option deines Browsers („Zum Startbildschirm hinzufügen“).');
+        // Fallback für Browser, die das Event nicht automatisch feuern
+        modalTitle.textContent = "App installieren";
+        modalText.innerHTML = "Öffne das Menü deines Browsers (oben rechts die 3 Punkte) und wähle <strong>„Zum Startbildschirm hinzufügen“</strong> oder <strong>„App installieren“</strong>.";
+        iosModal.classList.remove('hidden');
       }
     });
 
-    function closeIosModal() {
+    function closeModal() {
       iosModal.classList.add('hidden');
-    }
-
-    // Wenn die App auf iOS läuft, Button einblenden, damit iOS Nutzer auch eine Anleitung bekommen
-    if (isIOS && !isStandalone) {
-      installSection.classList.remove('hidden');
     }
 
     calculate();
