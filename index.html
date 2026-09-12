@@ -1,9 +1,23 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
+  <!--
+    ================================================================================
+    DEV-SYSTEM-PROMPT & ARBEITSANWEISUNGEN (Für zukünftige Sitzungen / Uploads)
+    ================================================================================
+    1. CODE-GENERIERUNG: Generiere erst dann kompletten Code (index.html), wenn der 
+       Benutzer dich explizit und direkt dazu auffordert. Vorher analysieren, 
+       konzipieren und besprechen.
+    2. CHANGELOG: Das Projekt-Logbuch wird lückenlos als JavaScript-Array im Code 
+       gepflegt. Versionsnummern werden NUR auf explizite Aufforderung erhöht. 
+       Es werden ausschließlich positive, erfolgreich umgesetzte Features eingetragen.
+    3. ARCHITEKTUR: Single-File HTML5, Tailwind CSS (CDN), Vanilla JS. Keine unnötigen 
+       Developer-Kommentare im produktiven JS-Code, strikt ganzzahlige Rundung bei Ergebnissen.
+    ================================================================================
+  -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rohr-Etagenberechnung v0.4.4</title>
+  <title>Rohr-Etagenberechnung v0.4.5</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- PWA Manifest & Theme -->
   <link rel="manifest" href="manifest.json">
@@ -18,7 +32,7 @@
     <!-- Header -->
     <header class="bg-indigo-600 text-white p-5 sm:p-6 rounded-2xl shadow-md">
       <h1 class="text-2xl font-bold">Rohr-Etagenberechnung</h1>
-      <p class="text-indigo-100 text-xs sm:text-sm mt-0.5">Version v0.4.4 &bull; Rohrende links geschlossen, rechts mit Öffnung</p>
+      <p class="text-indigo-100 text-xs sm:text-sm mt-0.5">Version v0.4.5 &bull; Inklusive persistentem DEV-System-Prompt</p>
     </header>
 
     <!-- Kombinierte Box: 3D-Isometrie und Eingaben in einem Container -->
@@ -26,7 +40,7 @@
       
       <!-- 3D-Isometrie Sektion -->
       <div class="space-y-1.5">
-        <h2 class="text-xs font-semibold text-slate-500 uppercase tracking-wider">3D-Isometrie Modell (Kombinierter Rohrabschluss)</h2>
+        <h2 class="text-xs font-semibold text-slate-500 uppercase tracking-wider">3D-Isometrie Modell (Mobile 5% Puffer & Verdeckung)</h2>
         <div class="w-full h-[260px] sm:h-[340px] bg-slate-50 rounded-xl border border-slate-200 overflow-hidden flex items-center justify-center shadow-inner">
           <svg id="svg_sketch" viewBox="0 0 1000 580" class="w-full h-full">
             <g id="gfx_container"></g>
@@ -133,7 +147,7 @@
       📱 App installieren
     </button>
     <button onclick="openChangelog()" class="bg-slate-700 hover:bg-slate-600 text-white font-semibold px-4 py-3 rounded-xl text-sm shadow transition-colors flex items-center justify-center gap-1.5">
-      📜 Änderungslog (v0.4.4)
+      📜 Änderungslog (v0.4.5)
     </button>
     <button onclick="downloadApp()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-4 py-3 rounded-xl text-sm shadow transition-colors flex items-center justify-center gap-1.5">
       💾 HTML Speichern
@@ -167,7 +181,8 @@
 
   <script>
     const projectChangelog = [
-      { version: "v0.4.4", date: "12.09.2026, 15:15", text: "Linkes Rohrende halbrund geschlossen, rechtes Rohrende mit technischer Öffnung ('schwarzes Loch') versehen; Ergebnisse strikt ganzzahlig.", border: "border-indigo-500" },
+      { version: "v0.4.5", date: "12.09.2026, 15:30", text: "Persistenter DEV-System-Prompt und strikte Changelog-Regeln als unzerstörbarer Kommentarblock im HTML-Head verankert.", border: "border-indigo-500" },
+      { version: "v0.4.4", date: "12.09.2026, 15:15", text: "Linkes Rohrende halbrund geschlossen, rechtes Rohrende mit technischer Öffnung versehen; strikt ganzzahlige Ergebnisse.", border: "border-indigo-500" },
       { version: "v0.4.3", date: "12.09.2026, 13:50", text: "3D-Isometrie Fixpunkt auf Standard (540) zurückgesetzt; dynamische Skalierung für flache Winkel aktiv.", border: "border-indigo-500" },
       { version: "v0.4.2", date: "12.09.2026, 12:47", text: "Darstellungs-Bugfix für 90°-Bögen in der 3D-Isometrie behoben; axiales Maß und Winkelbegrenzung angepasst.", border: "border-indigo-500" },
       { version: "v0.4.1", date: "12.09.2026, 12:20", text: "Lückenloses Changelog als JS-Array integriert; untere Trennlinie bei Eingabewerten beibehalten.", border: "border-indigo-500" },
@@ -475,7 +490,6 @@
       const pipeOuter = document.createElementNS('http://www.w3.org/2000/svg', 'path');
       pipeOuter.setAttribute('d', dPath); pipeOuter.setAttribute('fill', 'none');
       pipeOuter.setAttribute('stroke', '#64748b'); pipeOuter.setAttribute('stroke-width', '36');
-      // Linkes (hinteres) Ende rund, rechtes (vorderes) Ende standard
       pipeOuter.setAttribute('stroke-linecap', 'round');
       pipeOuter.setAttribute('stroke-linejoin', 'round'); pipeOuter.setAttribute('opacity', '0.7');
 
@@ -502,7 +516,6 @@
       pipeGroup.appendChild(pipeOuter);
       pipeGroup.appendChild(pipeInner);
 
-      // Nur auf der rechten (vorderen) Seite das offene Rohrende ("schwarzes Loch") zeichnen
       const targetEnd = pxT === 0 ? { x: C_pt.x + 100, y: C_pt.y + 100 } : P_out;
       pipeGroup.appendChild(createPipeEnd(targetEnd));
 
