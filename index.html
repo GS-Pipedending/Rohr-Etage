@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rohr-Etagenberechnung v0.3.3</title>
+  <title>Rohr-Etagenberechnung v0.3.8</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- PWA Manifest & Theme -->
   <link rel="manifest" href="manifest.json">
@@ -15,10 +15,10 @@
 
   <div class="max-w-3xl mx-auto space-y-5 w-full">
     
-    <!-- Header mit Version v0.3.3 -->
+    <!-- Header mit Version v0.3.8 -->
     <header class="bg-indigo-600 text-white p-5 sm:p-6 rounded-2xl shadow-md">
       <h1 class="text-2xl font-bold">Rohr-Etagenberechnung</h1>
-      <p class="text-indigo-100 text-xs sm:text-sm mt-0.5">Version v0.3.3 &bull; Inklusive direktem Favicon für Firefox</p>
+      <p class="text-indigo-100 text-xs sm:text-sm mt-0.5">Version v0.3.8 &bull; Bereinigte Baustellen-Ansicht</p>
     </header>
 
     <!-- Grafische Visualisierung -->
@@ -40,7 +40,7 @@
         <div>
           <label class="block text-xs font-semibold text-slate-600 mb-1">Höhenversatz (V)</label>
           <div class="relative">
-            <input type="text" id="v_hoehenversatz" value="500" placeholder="0" inputmode="decimal" class="w-full bg-slate-50 border-l-4 border-l-emerald-500 border-slate-300 rounded-lg p-2.5 pr-12 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+            <input type="text" id="v_hoehenversatz" value="50" placeholder="0" inputmode="decimal" class="w-full bg-slate-50 border-l-4 border-l-emerald-500 border-slate-300 rounded-lg p-2.5 pr-12 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
             <span class="absolute right-3 top-2.5 font-bold text-slate-500 text-sm">mm</span>
           </div>
         </div>
@@ -48,7 +48,7 @@
         <div>
           <label class="block text-xs font-semibold text-slate-600 mb-1">Seitenversatz (h)</label>
           <div class="relative">
-            <input type="text" id="h_seitenversatz" value="500" placeholder="0" inputmode="decimal" class="w-full bg-slate-50 border-l-4 border-l-sky-500 border-slate-300 rounded-lg p-2.5 pr-12 focus:ring-2 focus:ring-sky-500 focus:outline-none">
+            <input type="text" id="h_seitenversatz" value="273" placeholder="0" inputmode="decimal" class="w-full bg-slate-50 border-l-4 border-l-sky-500 border-slate-300 rounded-lg p-2.5 pr-12 focus:ring-2 focus:ring-sky-500 focus:outline-none">
             <span class="absolute right-3 top-2.5 font-bold text-slate-500 text-sm">mm</span>
           </div>
         </div>
@@ -56,7 +56,7 @@
         <div>
           <label class="block text-xs font-semibold text-slate-600 mb-1">Biegewinkel (a)</label>
           <div class="relative">
-            <input type="text" id="a_biegewinkel" value="90" placeholder="0" inputmode="decimal" class="w-full bg-slate-50 border-l-4 border-l-amber-500 border-slate-300 rounded-lg p-2.5 pr-12 focus:ring-2 focus:ring-amber-500 focus:outline-none">
+            <input type="text" id="a_biegewinkel" value="30" placeholder="0" inputmode="decimal" class="w-full bg-slate-50 border-l-4 border-l-amber-500 border-slate-300 rounded-lg p-2.5 pr-12 focus:ring-2 focus:ring-amber-500 focus:outline-none">
             <span class="absolute right-3 top-2.5 font-bold text-slate-500 text-sm">°</span>
           </div>
         </div>
@@ -83,23 +83,29 @@
     <section class="bg-white p-5 rounded-2xl shadow-sm space-y-4">
       <h2 class="text-lg font-semibold text-slate-700 border-b pb-2">Ergebnisse</h2>
       <div class="space-y-3">
+        <!-- Nachziehlänge (bereinigt) -->
+        <div class="p-4 bg-pink-50 rounded-xl border-l-4 border-pink-500 shadow-sm">
+          <div class="text-xs font-bold text-pink-800 uppercase tracking-wider">Nachziehlänge (Auszugmaß)</div>
+          <div id="out_t" class="text-2xl font-bold text-pink-950 mt-0.5">0 mm</div>
+        </div>
+
         <div class="p-4 bg-red-50/50 rounded-xl border-l-4 border-red-500">
-          <div class="text-xs font-semibold text-red-800 uppercase tracking-wider">Kombinierter Versatz im Raum (C)</div>
+          <div class="text-xs font-semibold text-red-800 uppercase tracking-wider">Kombinierter Raumversatz</div>
           <div id="out_c" class="text-xl font-bold text-red-950 mt-0.5">0 mm</div>
         </div>
 
         <div class="p-4 bg-orange-50 rounded-xl border-l-4 border-orange-500 shadow-sm">
-          <div class="text-xs font-bold text-orange-800 uppercase tracking-wider">Theoretische Schräglänge (R)</div>
-          <div id="out_schraeglaenge" class="text-xl font-bold text-orange-950 mt-0.5">0 mm</div>
+          <div class="text-xs font-bold text-orange-800 uppercase tracking-wider">Schräglänge (Rohrlänge zwischen Bögen)</div>
+          <div id="out_travel" class="text-xl font-bold text-orange-950 mt-0.5">0 mm</div>
         </div>
 
-        <div class="p-4 bg-pink-50/50 rounded-xl border-l-4 border-pink-500">
-          <div class="text-xs font-semibold text-pink-800 uppercase tracking-wider">Nachziehlänge (T)</div>
-          <div id="out_t" class="text-xl font-bold text-pink-950 mt-0.5">0 mm</div>
+        <div class="p-4 bg-sky-50 rounded-xl border-l-4 border-sky-500 shadow-sm">
+          <div class="text-xs font-bold text-sky-800 uppercase tracking-wider">Axialer Versatz (Etagenlänge im Raum)</div>
+          <div id="out_run" class="text-xl font-bold text-sky-950 mt-0.5">0 mm</div>
         </div>
 
         <div class="p-4 bg-purple-50/50 rounded-xl border-l-4 border-purple-500">
-          <div class="text-xs font-semibold text-purple-800 uppercase tracking-wider">Verdrehwinkel für die Biegung (f)</div>
+          <div class="text-xs font-semibold text-purple-800 uppercase tracking-wider">Verdrehwinkel für die Biegung</div>
           <div id="out_f" class="text-xl font-bold text-purple-950 mt-0.5">0 °</div>
         </div>
 
@@ -120,7 +126,7 @@
     </button>
     <!-- Änderungslog -->
     <button onclick="openChangelog()" class="bg-slate-700 hover:bg-slate-600 text-white font-semibold px-4 py-3 rounded-xl text-sm shadow transition-colors flex items-center justify-center gap-1.5">
-      📜 Änderungslog (v0.3.3)
+      📜 Änderungslog (v0.3.8)
     </button>
     <!-- HTML Speichern -->
     <button onclick="downloadApp()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-4 py-3 rounded-xl text-sm shadow transition-colors flex items-center justify-center gap-1.5">
@@ -139,10 +145,50 @@
         
         <div class="p-3 bg-slate-50 rounded-xl border-l-4 border-indigo-500">
           <div class="flex justify-between font-bold text-slate-700 text-xs">
+            <span>Version v0.3.8</span>
+            <span>12.09.2026, 11:23 Uhr</span>
+          </div>
+          <p class="mt-1">Beschriftung der Nachziehlänge bereinigt (Zusatz entfernt).</p>
+        </div>
+
+        <div class="p-3 bg-slate-50 rounded-xl border-l-4 border-indigo-500">
+          <div class="flex justify-between font-bold text-slate-700 text-xs">
+            <span>Version v0.3.7</span>
+            <span>12.09.2026, 11:22 Uhr</span>
+          </div>
+          <p class="mt-1">Nachziehlänge als wichtigster Baustellen-Faktor ganz nach oben an die Spitze der Ergebnisliste gesetzt.</p>
+        </div>
+
+        <div class="p-3 bg-slate-50 rounded-xl border-l-4 border-indigo-500">
+          <div class="flex justify-between font-bold text-slate-700 text-xs">
+            <span>Version v0.3.6</span>
+            <span>12.09.2026, 11:21 Uhr</span>
+          </div>
+          <p class="mt-1">Oberfläche komplett auf deutsche Bezeichnungen umgestellt; alle Ergebnisse ganzzahlig kaufmännisch gerundet.</p>
+        </div>
+
+        <div class="p-3 bg-slate-50 rounded-xl border-l-4 border-indigo-500">
+          <div class="flex justify-between font-bold text-slate-700 text-xs">
+            <span>Version v0.3.5</span>
+            <span>10.09.2026, 13:45 Uhr</span>
+          </div>
+          <p class="mt-1">Formeln exakt an den branchenüblichen Standard für Rolling Offsets (True Offset, Travel, Run) angepasst[cite: 2].</p>
+        </div>
+
+        <div class="p-3 bg-slate-50 rounded-xl border-l-4 border-indigo-500">
+          <div class="flex justify-between font-bold text-slate-700 text-xs">
+            <span>Version v0.3.4</span>
+            <span>10.09.2026, 13:30 Uhr</span>
+          </div>
+          <p class="mt-1">Erste Korrekturen der Berechnungslogik für Roll-Offsets.</p>
+        </div>
+
+        <div class="p-3 bg-slate-50 rounded-xl border-l-4 border-indigo-500">
+          <div class="flex justify-between font-bold text-slate-700 text-xs">
             <span>Version v0.3.3</span>
             <span>10.09.2026, 13:11 Uhr</span>
           </div>
-          <p class="mt-1">Direktes Favicon im HTML-Kopf ergänzt, um Firefox beim Erstellen des Startbildschirm-Shortcuts mit dem Rohr-Icon zu versorgen.</p>
+          <p class="mt-1">Direktes Favicon im HTML-Kopf ergänzt für Firefox.</p>
         </div>
 
         <div class="p-3 bg-slate-50 rounded-xl border-l-4 border-indigo-500">
@@ -150,7 +196,7 @@
             <span>Version v0.3.2</span>
             <span>10.09.2026, 12:50 Uhr</span>
           </div>
-          <p class="mt-1">Perfektes SVG-Rohrgeometrie-Icon (mit neutraler Faser und Biegerolle) direkt in die PWA-Manifest-Datei integriert.</p>
+          <p class="mt-1">Perfektes SVG-Rohrgeometrie-Icon integriert.</p>
         </div>
 
         <div class="p-3 bg-slate-50 rounded-xl border-l-4 border-indigo-500">
@@ -158,7 +204,7 @@
             <span>Version v0.3.1</span>
             <span>10.09.2026, 12:38 Uhr</span>
           </div>
-          <p class="mt-1">Lückenloses historisches Changelog implementiert.</p>
+          <p class="mt-1">Maßgeschneidertes App-Icon und historisches Changelog.</p>
         </div>
 
         <div class="p-3 bg-slate-50 rounded-xl border-l-4 border-indigo-500">
@@ -166,7 +212,7 @@
             <span>Version v0.3.0</span>
             <span>10.09.2026, 12:17 Uhr</span>
           </div>
-          <p class="mt-1">Echte PWA-Infrastruktur mit Service Worker (`sw.js`) eingeführt.</p>
+          <p class="mt-1">Echte PWA-Infrastruktur mit Service Worker eingeführt.</p>
         </div>
 
         <div class="p-3 bg-slate-50 rounded-xl border-l-4 border-slate-400">
@@ -182,7 +228,7 @@
             <span>Version v0.2.8</span>
             <span>10.09.2026, 12:00 Uhr</span>
           </div>
-          <p class="mt-1">Default-Dark-Mode-Experiment durchgeführt.</p>
+          <p class="mt-1">Default-Dark-Mode-Experiment.</p>
         </div>
 
         <div class="p-3 bg-slate-50 rounded-xl border-l-4 border-amber-500">
@@ -190,7 +236,7 @@
             <span>Version v0.2.7</span>
             <span>10.09.2026, 11:55 Uhr</span>
           </div>
-          <p class="mt-1">CSS-Spezifitäts-Overrides getestet.</p>
+          <p class="mt-1">CSS-Spezifitäts-Overrides.</p>
         </div>
 
         <div class="p-3 bg-slate-50 rounded-xl border-l-4 border-amber-500">
@@ -198,7 +244,7 @@
             <span>Version v0.2.6</span>
             <span>10.09.2026, 11:51 Uhr</span>
           </div>
-          <p class="mt-1">Meta-Tag Steuerung (`color-scheme`) eingebaut.</p>
+          <p class="mt-1">Meta-Tag Steuerung (`color-scheme`).</p>
         </div>
 
         <div class="p-3 bg-slate-50 rounded-xl border-l-4 border-amber-500">
@@ -206,7 +252,7 @@
             <span>Version v0.2.5</span>
             <span>10.09.2026, 11:36 Uhr</span>
           </div>
-          <p class="mt-1">Manueller Dark-Mode-Umschalter hinzugefügt.</p>
+          <p class="mt-1">Manueller Dark-Mode-Umschalter.</p>
         </div>
 
         <div class="p-3 bg-slate-50 rounded-xl border-l-4 border-emerald-500">
@@ -214,7 +260,7 @@
             <span>Version v0.2.4</span>
             <span>10.09.2026, 11:13 Uhr</span>
           </div>
-          <p class="mt-1">PWA-Installations-Button im Footer hinzugefügt.</p>
+          <p class="mt-1">PWA-Installations-Button im Footer.</p>
         </div>
 
         <div class="p-3 bg-slate-50 rounded-xl border-l-4 border-slate-400">
@@ -230,7 +276,7 @@
             <span>Version v0.2.2</span>
             <span>10.09.2026, 11:04 Uhr</span>
           </div>
-          <p class="mt-1">Integriertes Changelog-Logbuch per Button hinzugefügt.</p>
+          <p class="mt-1">Integriertes Changelog-Logbuch per Button.</p>
         </div>
 
         <div class="p-3 bg-slate-50 rounded-xl border-l-4 border-slate-400">
@@ -238,7 +284,7 @@
             <span>Version v0.2.1</span>
             <span>10.09.2026, 11:02 Uhr</span>
           </div>
-          <p class="mt-1">Vollbild-Button entfernt; „HTML Speichern“-Button verschoben.</p>
+          <p class="mt-1">Vollbild-Button entfernt.</p>
         </div>
 
         <div class="p-3 bg-slate-50 rounded-xl border-l-4 border-slate-400">
@@ -246,7 +292,7 @@
             <span>Version v0.2.0</span>
             <span>10.09.2026, 10:55 Uhr</span>
           </div>
-          <p class="mt-1">Stabiles Basis-Setup mit LocalStorage und SVG-Isometrie etabliert.</p>
+          <p class="mt-1">Stabiles Basis-Setup mit LocalStorage.</p>
         </div>
 
       </div>
@@ -327,7 +373,6 @@
 
     const toRad = (deg) => (deg * Math.PI) / 180;
     const toDeg = (rad) => (rad * 180) / Math.PI;
-    const roundInt = (val) => Math.round(val);
 
     function downloadApp() {
       const htmlContent = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
@@ -378,6 +423,7 @@
       }
     });
 
+    // Berechnung mit ganzzahliger kaufmännischer Rundung
     function calculate() {
       const v = parseFloat(document.getElementById('v_hoehenversatz').value.replace(',', '.')) || 0;
       const h = parseFloat(document.getElementById('h_seitenversatz').value.replace(',', '.')) || 0;
@@ -386,42 +432,59 @@
       const rFaktor = parseFloat(document.getElementById('r_faktor').value) || 3;
 
       const rBiege = d * rFaktor;
-      const c = roundInt(Math.sqrt((h * h) + (v * v)));
+      
+      const c = Math.sqrt((h * h) + (v * v));
 
-      let schraeglaenge = 0;
-      let t = 0;
+      let travel = 0; 
+      let run = 0;    
+      let t_cutback = 0; 
 
       if (a !== 0) {
+        const angleRad = toRad(a);
+        
         if (Math.abs(a - 90) < 0.001) {
-          schraeglaenge = 0;
+          travel = c;
+          run = c;
           const radHalfA = toRad(45);
           const abzug = 2 * rBiege * (Math.tan(radHalfA) - toRad(45));
-          t = roundInt(c - abzug);
+          t_cutback = c - abzug;
         } else {
-          schraeglaenge = roundInt(c / Math.sin(toRad(a)));
-          const radHalfA = toRad(a / 2);
+          travel = c / Math.sin(angleRad);
+          run = c / Math.tan(angleRad);
+          
+          const radHalfA = angleRad / 2;
           const abzug = 2 * rBiege * (Math.tan(radHalfA) - radHalfA);
-          t = roundInt(schraeglaenge - abzug);
+          t_cutback = travel - abzug;
         }
       }
 
       let f = 0;
       if (v !== 0 || h !== 0) {
-        f = roundInt(toDeg(Math.atan2(h, v)));
+        f = toDeg(Math.atan2(h, v));
       }
 
-      const anreisumfang = roundInt((d * Math.PI * Math.abs(f)) / 360);
+      const anreisumfang = (d * Math.PI * Math.abs(f)) / 360;
 
-      document.getElementById('out_c').textContent = c.toLocaleString('de-DE') + ' mm';
-      document.getElementById('out_schraeglaenge').textContent = schraeglaenge.toLocaleString('de-DE') + ' mm';
-      document.getElementById('out_t').textContent = t.toLocaleString('de-DE') + ' mm';
-      document.getElementById('out_f').textContent = f.toLocaleString('de-DE') + ' °';
-      document.getElementById('out_anreisumfang').textContent = anreisumfang.toLocaleString('de-DE') + ' mm';
+      // Ergebnisse ganzzahlig runden
+      const cRund = Math.round(c);
+      const travelRund = Math.round(travel);
+      const runRund = Math.round(run);
+      const tRund = Math.round(t_cutback);
+      const fRund = Math.round(f);
+      const anreisRund = Math.round(anreisumfang);
 
-      drawBoxAndLines(v, h, a, c, schraeglaenge, t);
+      // Ausgabe mit ganzzahligen Werten und deutscher Formatierung (Nachziehlänge ganz oben)
+      document.getElementById('out_t').textContent = tRund.toLocaleString('de-DE') + ' mm';
+      document.getElementById('out_c').textContent = cRund.toLocaleString('de-DE') + ' mm';
+      document.getElementById('out_travel').textContent = travelRund.toLocaleString('de-DE') + ' mm';
+      document.getElementById('out_run').textContent = runRund.toLocaleString('de-DE') + ' mm';
+      document.getElementById('out_f').textContent = fRund.toLocaleString('de-DE') + ' °';
+      document.getElementById('out_anreisumfang').textContent = anreisRund.toLocaleString('de-DE') + ' mm';
+
+      drawBoxAndLines(v, h, a, c, travel, t_cutback);
     }
 
-    function drawBoxAndLines(v, h, a, c, schraeglaenge, t) {
+    function drawBoxAndLines(v, h, a, c, travel, t) {
       const container = document.getElementById('gfx_container');
       container.innerHTML = '';
 
